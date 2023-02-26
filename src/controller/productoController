@@ -1,0 +1,129 @@
+//importamos el Schema
+const product = require('../models/ProductoModel')
+
+//ver lista de productos
+
+exports.getProducto = async (req,res,next) =>{
+  
+    try {
+        const producto =  await product.find();
+        res.status(200).json({
+           success: true,
+           producto
+        })
+
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).send("Hubo un error")
+        
+    }         
+
+}
+
+//Crear nuevo producto/api/productos
+
+exports.newProducto = async  (req,res,next) =>{
+    try {
+        const producto = await product.create(req.body)
+        res.status(201).json({
+            success:true,
+            producto
+        })
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).send("Hubo un error")
+         
+    }
+       
+}
+
+//Buscar producto por _id
+
+exports.getProductoById = async (req,res,next) =>{
+   try {
+      const productoById = await product.findById(req.params.id);
+      if(!productoById){
+        return res.status(404).json({
+            success: false,
+            message: "No se encontro el producto"
+        })
+      }
+      res.status(200).json({
+          success: true,
+          message: "Aqui debajo encontrara la información del producto",
+          productoById
+      })
+       
+    
+   } catch (error) {
+        console.log(error);
+        res.status(500).send("Hubo un error")
+    
+   }
+
+}
+
+//Actualizar producto por _id
+
+exports.updateProducto = async (req,res,next) => {
+    
+    try {
+        let productoUpdate = await product.findById(req.params.id);
+        if(!productoUpdate){  //verificando si el producto existe
+            return res.status(404).json({
+                success : false,
+                message :"No se encontro ese producto"
+            })
+
+        }
+        //si el producto existe se actualiza la información
+        productoUpdate = await product.findByIdAndUpdate(req.params.id, req.body,{
+            new: true,
+            runValidators: true
+        
+        });
+
+        //responde ok si el producto se actualizó
+        res.status(200).json({
+            success: true,
+            message:"producto actualizado correctamente",
+            productoUpdate
+        })
+         
+
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).send("Hubo un error")
+        
+    }
+
+}
+
+//Eliminar un producto
+ 
+exports.deleteProducto = async (req, res, next) =>{
+    try {
+        const producto = await product.findById(req.params.id)
+        if(!producto){          //verificar si el producto existe
+            return res.status(404).json({
+                success: false,
+                message:"No se encontró ese producto"
+            })
+        }
+        //Eliminación del producto
+        await product.findOneAndRemove({_id: req.params.id})
+        res.status(200).json({
+            success: true,
+            message: "El producto fue eliminado correctamente"
+        })
+       
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Hubo un error")
+        
+    }
+    
+}
